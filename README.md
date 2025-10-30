@@ -1,5 +1,6 @@
 <div align="center">
-# 🖥️ Gestionale Clienti - Team HV
+
+## 🔹 🖥️ Gestionale Clienti - Team HV
 
 Un’applicazione completa per la gestione clienti e eventi, progettata per semplicità, efficienza e deploy rapido.  
 
