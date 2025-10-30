@@ -1,16 +1,12 @@
 <div align="center">
-  <img width="1200" height="475" alt="Gestionale HV" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # 🖥️ Gestionale Clienti - Team HV
 
 Un’applicazione completa per la gestione clienti e eventi, progettata per semplicità, efficienza e deploy rapido.  
 
-<div align="center">
-  ![Node.js](https://img.shields.io/badge/Node.js-16+-green)
-  ![Vercel](https://img.shields.io/badge/Deploy-Vercel-blue)
-  ![License](https://img.shields.io/badge/License-MIT-lightgrey)
-</div>
+
+   <img src="https://img.shields.io/badge/Node.js-16+-green">
+   <img src="https://img.shields.io/badge/Deploy-Vercel-blue">
+   <img src="https://img.shields.io/badge/License-MIT-lightgrey">
 
 ---
 
@@ -31,4 +27,4 @@ Un’applicazione completa per la gestione clienti e eventi, progettata per semp
 - Git installato  
 - (Opzionale) configurazioni locali per database o file di dati  
 
----
+</div>
