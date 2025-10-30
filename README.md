@@ -5,9 +5,9 @@
 Un’applicazione completa per la gestione clienti e eventi, progettata per semplicità, efficienza e deploy rapido.  
 
 
-   <img src="https://img.shields.io/badge/Node.js-16+-green">
-   <img src="https://img.shields.io/badge/Deploy-Vercel-blue">
-   <img src="https://img.shields.io/badge/License-MIT-lightgrey">
+   <img src="https://img.shields.io/badge/Node.js-16+-green" />
+   <img src="https://img.shields.io/badge/Deploy-Vercel-blue" />
+   <img src="https://img.shields.io/badge/License-MIT-lightgrey" />
 
 ---
 
@@ -18,7 +18,6 @@ Un’applicazione completa per la gestione clienti e eventi, progettata per semp
 | Gestione Clienti               | Aggiungi, modifica e rimuovi clienti facilmente |
 | Eventi                         | Crea, monitora e chiudi eventi                 |
 | Sincronizzazione Remota         | Deploy e backup automatico su Vercel          |
-| Interfaccia Intuitiva          | Responsive e user-friendly                     |
 
 ---
 
