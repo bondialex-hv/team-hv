@@ -1,0 +1,5 @@
+{
+  "name": "Gestionale Clienti",
+  "description": "Un semplice CRM per la gestione dei clienti e dei task giornalieri su un calendario condiviso. Permette di aggiungere clienti, assegnare task in date specifiche e filtrare la visualizzazione del calendario per cliente.",
+  "requestFramePermissions": []
+}
