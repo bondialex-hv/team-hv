@@ -24,9 +24,9 @@ Un’applicazione completa per la gestione clienti e eventi, progettata per semp
 ## 🛠️ Prerequisiti
 
 <div align="left">
-- Node.js v16 o superiore  
-- Git installato  
-- (Opzionale) configurazioni locali per database o file di dati 
+- Node.js v16 o superiore<br />  
+- Git installato<br />  
+- (Opzionale) configurazioni locali per database o file di dati<br /> 
 </div>
 
 </div>
