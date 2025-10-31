@@ -25,7 +25,7 @@ import AddUserModal from './components/AddUserModal';
 import { User, Client, Task } from './types';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser, createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, setDoc, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, setDoc } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { COLORS } from './constants';
 
@@ -211,11 +211,11 @@ function App() {
   
   const handleAddUser = async (name: string, password: string) => {
     if (!db || !auth) return;
-  
+
     try {
       const email = `${name.toLowerCase()}@gestionale.hv`;
-    
-      // Crea una seconda istanza di Firebase solo per questo scopo
+
+      // Crea una seconda istanza di Firebase solo per registrare il nuovo utente
       const secondaryApp = initializeApp({
         apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
         authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -224,46 +224,44 @@ function App() {
         messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
         appId: import.meta.env.VITE_FIREBASE_APP_ID
       }, "Secondary");
-    
+
       const secondaryAuth = getAuth(secondaryApp);
-      const secondaryDb = getFirestore(secondaryApp);
-    
-      // Crea l'utente usando l'istanza secondaria
+
+      // ✅ L’admin crea il nuovo utente
       const userCredential = await createUserWithEmailAndPassword(
-        secondaryAuth, 
-        email, 
+        secondaryAuth,
+        email,
         password
       );
+
       const newUser = userCredential.user;
 
-      // IMPORTANTE: Usa il database secondario che è autenticato come nuovo utente
-      await setDoc(doc(secondaryDb, 'users', newUser.uid), {
+      // ✅ Usa il db principale (autenticato come admin)
+      await setDoc(doc(db, 'users', newUser.uid), {
         name: name,
         role: 'user',
         avatarUrl: `https://i.pravatar.cc/150?u=${newUser.uid}`
       });
 
-      // Pulisci l'istanza secondaria
+      // Pulisci l’istanza secondaria
       await secondaryAuth.signOut();
       await deleteApp(secondaryApp);
 
       alert("Utente creato con successo!");
       setIsAddUserModalOpen(false);
-    
+
     } catch (error: any) {
       console.error("Error adding user: ", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-    
       if (error.code === 'auth/email-already-in-use') {
         alert("Un utente con questo nome esiste già.");
       } else if (error.code === 'auth/weak-password') {
-        alert("La password è troppo debole. Deve essere di almeno 6 caratteri.");
+        alert("La password è troppo debole (almeno 6 caratteri).");
       } else {
-        alert(`Si è verificato un errore durante la creazione dell'utente: ${error.message}`);
+        alert(`Errore durante la creazione dell'utente: ${error.message}`);
       }
     }
   };
+
 
   const handleRemoveUser = (id: string) => {
     if (!db) return;
