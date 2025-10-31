@@ -1,4 +1,20 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_FIREBASE_API_KEY: string;
+  readonly VITE_FIREBASE_AUTH_DOMAIN: string;
+  readonly VITE_FIREBASE_PROJECT_ID: string;
+  readonly VITE_FIREBASE_STORAGE_BUCKET: string;
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string;
+  readonly VITE_FIREBASE_APP_ID: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import Calendar from './components/Calendar';
 import Login from './components/Login';
@@ -8,8 +24,9 @@ import ConfirmationModal from './components/ConfirmationModal';
 import AddUserModal from './components/AddUserModal';
 import { User, Client, Task } from './types';
 import { auth, db } from './firebase';
-import { onAuthStateChanged, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged, User as FirebaseUser, createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, writeBatch, setDoc, getFirestore } from 'firebase/firestore';
+import { initializeApp, deleteApp } from 'firebase/app';
 import { COLORS } from './constants';
 
 function App() {
@@ -17,7 +34,7 @@ function App() {
   const [clients, setClients] = useState<Client[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [_firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -195,31 +212,52 @@ function App() {
     try {
       const email = `${name.toLowerCase()}@gestionale.hv`;
     
-      // Crea il nuovo utente (questo ti logga automaticamente come nuovo utente)
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Crea una seconda istanza di Firebase solo per questo scopo
+      const secondaryApp = initializeApp({
+        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+        appId: import.meta.env.VITE_FIREBASE_APP_ID
+      }, "Secondary");
+    
+      const secondaryAuth = getAuth(secondaryApp);
+      const secondaryDb = getFirestore(secondaryApp);
+    
+      // Crea l'utente usando l'istanza secondaria
+      const userCredential = await createUserWithEmailAndPassword(
+        secondaryAuth, 
+        email, 
+        password
+      );
       const newUser = userCredential.user;
 
-      // Salva i dati nel database mentre sei loggato come nuovo utente
-      await setDoc(doc(db, 'users', newUser.uid), {
+      // IMPORTANTE: Usa il database secondario che è autenticato come nuovo utente
+      await setDoc(doc(secondaryDb, 'users', newUser.uid), {
         name: name,
         role: 'user',
         avatarUrl: `https://i.pravatar.cc/150?u=${newUser.uid}`
       });
 
-      // Fai logout per permettere all'admin di rifare il login
-      await auth.signOut();
-    
-      alert("Utente creato con successo! Effettua nuovamente il login.");
+      // Pulisci l'istanza secondaria
+      await secondaryAuth.signOut();
+      await deleteApp(secondaryApp);
+
+      alert("Utente creato con successo!");
       setIsAddUserModalOpen(false);
     
     } catch (error: any) {
       console.error("Error adding user: ", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+    
       if (error.code === 'auth/email-already-in-use') {
         alert("Un utente con questo nome esiste già.");
       } else if (error.code === 'auth/weak-password') {
         alert("La password è troppo debole. Deve essere di almeno 6 caratteri.");
       } else {
-        alert("Si è verificato un errore durante la creazione dell'utente. Riprova.");
+        alert(`Si è verificato un errore durante la creazione dell'utente: ${error.message}`);
       }
     }
   };
