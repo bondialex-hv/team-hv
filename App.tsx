@@ -44,6 +44,9 @@ function App() {
   const [isConfirmDeleteClientOpen, setIsConfirmDeleteClientOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isConfirmDeleteUserOpen, setIsConfirmDeleteUserOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+
 
   const dataUnsubscribeRef = useRef<() => void>(() => {});
 
@@ -262,20 +265,28 @@ function App() {
     }
   };
 
-  const handleRemoveUser = async (id: string) => {
+  const handleRemoveUser = (id: string) => {
     if (!db) return;
     if (users.length <= 1) {
-        alert("Non puoi rimuovere l'ultimo utente.");
-        return;
+      alert("Non puoi rimuovere l'ultimo utente.");
+      return;
     }
     if (id === loggedInUser?.id) {
-        alert("Non puoi rimuovere te stesso.");
-        return;
+      alert("Non puoi rimuovere te stesso.");
+      return;
     }
-    // Note: This only removes user from Firestore collection, not from Firebase Auth.
-    // Deleting from Auth is a protected admin action.
+
+    setUserToDelete(id);
+    setIsConfirmDeleteUserOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete || !db) return;
+
     try {
-      await deleteDoc(doc(db, 'users', id));
+      await deleteDoc(doc(db, 'users', userToDelete));
+      setIsConfirmDeleteUserOpen(false);
+      setUserToDelete(null);
     } catch (error) {
       console.error("Error removing user: ", error);
       alert("Si è verificato un errore. Riprova.");
@@ -389,6 +400,15 @@ function App() {
         onClose={() => setIsAddUserModalOpen(false)}
         onSave={handleAddUser}
       />
+      <ConfirmationModal
+        isOpen={isConfirmDeleteUserOpen}
+        title="Elimina Utente"
+        message="Sei sicuro di voler eliminare questo utente? Questa azione è irreversibile."
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setIsConfirmDeleteUserOpen(false)}
+        confirmText="Elimina"
+      />
+
     </div>
   );
 }
