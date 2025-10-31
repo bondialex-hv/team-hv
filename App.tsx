@@ -191,18 +191,27 @@ function App() {
   
   const handleAddUser = async (name: string, password: string) => {
     if (!db || !auth) return;
+  
     try {
       const email = `${name.toLowerCase()}@gestionale.hv`;
+    
+      // Crea il nuovo utente (questo ti logga automaticamente come nuovo utente)
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const newUser = userCredential.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
+      // Salva i dati nel database mentre sei loggato come nuovo utente
+      await setDoc(doc(db, 'users', newUser.uid), {
         name: name,
         role: 'user',
-        avatarUrl: `https://i.pravatar.cc/150?u=${user.uid}`
+        avatarUrl: `https://i.pravatar.cc/150?u=${newUser.uid}`
       });
 
+      // Fai logout per permettere all'admin di rifare il login
+      await auth.signOut();
+    
+      alert("Utente creato con successo! Effettua nuovamente il login.");
       setIsAddUserModalOpen(false);
+    
     } catch (error: any) {
       console.error("Error adding user: ", error);
       if (error.code === 'auth/email-already-in-use') {
